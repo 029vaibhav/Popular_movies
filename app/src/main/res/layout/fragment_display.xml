@@ -88,16 +88,16 @@
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <ImageView
+            <TextView
                 android:id="@+id/review"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/rating"
-                android:paddingEnd="10dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingStart="10dp"
-                android:src="@drawable/ic_action_review" />
+                android:drawableLeft="@drawable/ic_action_review"
+                android:drawableStart="@drawable/ic_action_review"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="@string/review_title" />
 
         </RelativeLayout>
 

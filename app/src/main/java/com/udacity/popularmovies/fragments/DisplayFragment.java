@@ -2,6 +2,7 @@ package com.udacity.popularmovies.fragments;
 
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,6 +13,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -54,7 +57,7 @@ public class DisplayFragment extends Fragment {
     Video video;
     private Snackbar snackbar;
     FloatingActionButton fab;
-    ImageView reviewImageView;
+    TextView reviewTextView;
     LinearLayout reviewLinearLayout, trailerLinearLayout;
     boolean reviewToggle;
     Client client;
@@ -83,6 +86,12 @@ public class DisplayFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         movieOrgResults = getArguments() != null ? getArguments().getParcelable(key) : null;
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        menu.setGroupVisible(R.id.menu_group, false);
+        super.onPrepareOptionsMenu(menu);
     }
 
 
@@ -212,7 +221,7 @@ public class DisplayFragment extends Fragment {
         recyclerView.setNestedScrollingEnabled(false);
         reviewRecyclerView = (RecyclerView) viewGroup.findViewById(R.id.recycler_view_review);
         reviewRecyclerView.setNestedScrollingEnabled(false);
-        reviewImageView = (ImageView) viewGroup.findViewById(R.id.review);
+        reviewTextView = (TextView) viewGroup.findViewById(R.id.review);
         linearLayoutManager = new LinearLayoutManager(getActivity());
         reviewLinearLayout = (LinearLayout) viewGroup.findViewById(R.id.ll_review);
         progressDialog = new ProgressDialog(getActivity());
@@ -223,7 +232,7 @@ public class DisplayFragment extends Fragment {
         snackbar = Snackbar.make(Coordinator.INSTANCE.getCoordinatorLayout(), getString(R.string.no_internet), Snackbar.LENGTH_INDEFINITE)
                 .setAction(getString(R.string.retry), v -> getMovieVideos(movieOrgResults.getId()));
         fab.setOnClickListener(v -> fabClickListener());
-        reviewImageView.setOnClickListener(v -> toggleReview());
+        reviewTextView.setOnClickListener(v -> toggleReview());
         client = new Client(getActivity());
     }
 
@@ -280,9 +289,32 @@ public class DisplayFragment extends Fragment {
     }
 
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        menu.setGroupVisible(R.id.menu_group, false);
-        super.onPrepareOptionsMenu(menu);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.movie_detail_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.share:
+                share();
+                return true;
+            default:
+                break;
+        }
+        return false;
+    }
+
+    private void share() {
+
+        if (video != null && video.getResults() != null && video.getResults().size() > 0) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, "http://www.youtube.com/watch?v=" + video.getResults().get(0).getKey());
+            sendIntent.setType("text/plain");
+            startActivity(sendIntent);
+        }
+
     }
 
     public void getVideoDataFromServer() {
