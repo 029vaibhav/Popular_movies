@@ -1,18 +1,20 @@
 <resources>
     <string name="app_name">Popular movies</string>
     <string name="api_url">http://api.themoviedb.org/3/</string>
-    <string name="api_key">your api key</string>
+    <string name="api_key">api_key</string>
     <string name="popular_movie_cache_key">popularity.desc</string>
     <string name="voted_movie_cache_key">vote_count.desc</string>
     <string name="sort_key">sorting_key</string>
     <string name="image_url">http://image.tmdb.org/t/p/w185/</string>
+    <string name="you_tube_image_url">http://img.youtube.com/vi/</string>
+
     <string name="no_internet">No Internet Connection</string>
     <string name="retry">Retry</string>
     <string name="trailers_title">Trailers</string>
+    <string name="review_title">Reviews</string>
     <string name="single_movie_key">movie</string>
     <string name="release_date_title">RELEASE DATE</string>
     <string name="rating_title">AVERAGE RATING</string>
-
 
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -20,4 +22,9 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="action_popular">Most popular</string>
     <string name="action_rated">Highest rated</string>
+    <string name="my_fav">My Favourites</string>
+    <string name="local_movie_key">movie</string>
+    <string name="local_video_key">video</string>
+
+
 </resources>

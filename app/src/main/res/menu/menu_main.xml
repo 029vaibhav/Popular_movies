@@ -15,5 +15,10 @@
             android:id="@+id/action_rated"
             android:title="@string/action_rated"
             app:showAsAction="collapseActionView" />
+
+        <item
+            android:id="@+id/favourites"
+            android:title="@string/my_fav"
+            app:showAsAction="collapseActionView" />
     </group>
 </menu>

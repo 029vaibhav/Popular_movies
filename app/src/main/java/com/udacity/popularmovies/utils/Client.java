@@ -4,16 +4,14 @@ import android.content.Context;
 
 import com.udacity.popularmovies.R;
 import com.udacity.popularmovies.entities.MovieOrg;
-
-import java.util.logging.Level;
+import com.udacity.popularmovies.entities.Reviews;
+import com.udacity.popularmovies.entities.Video;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
-
-import static java.util.logging.Level.CONFIG;
 
 /**
  * Created by vaibhav on 18/2/16.
@@ -42,9 +40,15 @@ public class Client {
         return movieDetailsByPopularity;
     }
 
-//    public void getMostVotedMovies(Callback<MovieOrg> responseCallback) {
-//        service.getMovieDetailsByRating(context.getString(R.string.api_key), responseCallback);
-//    }
+    public Call<Video> getVideoDetails(String id) {
+        Call<Video> videoCall =  service.getVideoDetails(id, context.getString(R.string.api_key));
+        return videoCall;
+    }
+
+    public Call<Reviews> getReviewDetails(String id) {
+        Call<Reviews> reviewDetails =  service.getReviewDetails(id, context.getString(R.string.api_key));
+        return reviewDetails;
+    }
 }
 
 

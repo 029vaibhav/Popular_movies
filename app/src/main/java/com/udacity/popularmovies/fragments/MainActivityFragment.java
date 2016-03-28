@@ -1,12 +1,12 @@
 package com.udacity.popularmovies.fragments;
 
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,13 +14,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.colintmiller.simplenosql.NoSQL;
+import com.colintmiller.simplenosql.NoSQLEntity;
 import com.udacity.popularmovies.R;
 import com.udacity.popularmovies.adapters.MoviesDisplayAdapter;
 import com.udacity.popularmovies.entities.MovieOrg;
+import com.udacity.popularmovies.entities.MovieOrgResults;
 import com.udacity.popularmovies.entities.enums.Coordinator;
 import com.udacity.popularmovies.utils.Client;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -43,6 +47,7 @@ public class MainActivityFragment extends Fragment {
     Snackbar snackbar;
     String sortKey;
 
+
     public MainActivityFragment() {
 
     }
@@ -62,7 +67,10 @@ public class MainActivityFragment extends Fragment {
         if (movieOrg != null) {
             displayResults(movieOrg);
         } else {
-            getDataFromServer();
+            if (sortKey != null && sortKey.equalsIgnoreCase(getString(R.string.local_movie_key)))
+                getDataFromLocalDB();
+            else
+                getDataFromServer();
         }
         return viewGroup;
     }
@@ -79,7 +87,10 @@ public class MainActivityFragment extends Fragment {
 
     private void initViews(ViewGroup viewGroup) {
         recyclerView = (RecyclerView) viewGroup.findViewById(R.id.recycler_view);
-        gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+        else
+            gridLayoutManager = new GridLayoutManager(getActivity(), 3);
         snackbar = Snackbar.make(Coordinator.INSTANCE.getCoordinatorLayout(), getString(R.string.no_internet), Snackbar.LENGTH_INDEFINITE)
                 .setAction(getString(R.string.retry), v -> getDataFromServer());
     }
@@ -120,6 +131,18 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_main, menu);
+        String string = sharedPreferences.getString(getString(R.string.sort_key), getString(R.string.popular_movie_cache_key));
+        switch (string) {
+            case "popularity.desc":
+                menu.getItem(0).setChecked(true);
+                break;
+            case "vote_count.desc":
+                menu.getItem(1).setChecked(true);
+                break;
+            case "movie":
+                menu.getItem(2).setChecked(true);
+                break;
+        }
     }
 
     @Override
@@ -131,6 +154,9 @@ public class MainActivityFragment extends Fragment {
             case R.id.action_rated:
                 updateSortingDetails(item, getString(R.string.voted_movie_cache_key));
                 return true;
+            case R.id.favourites:
+                updateSortingDetails(item, getString(R.string.local_movie_key));
+                return true;
             default:
                 break;
         }
@@ -139,11 +165,39 @@ public class MainActivityFragment extends Fragment {
 
     private void updateSortingDetails(MenuItem item, String sortingKey) {
         if (!item.isChecked()) {
-            item.setChecked(true);
-            sortKey = sortingKey;
-            sharedPreferences.edit().putString(getString(R.string.sort_key), getString(R.string.popular_movie_cache_key)).apply();
-            getDataFromServer();
+            if (!sortingKey.equalsIgnoreCase(getString(R.string.local_movie_key))) {
+                item.setChecked(true);
+                sortKey = sortingKey;
+                sharedPreferences.edit().putString(getString(R.string.sort_key), sortKey).apply();
+                getDataFromServer();
+            } else {
+                item.setChecked(true);
+                sortKey = sortingKey;
+                sharedPreferences.edit().putString(getString(R.string.sort_key), sortKey).apply();
+                getDataFromLocalDB();
+            }
         }
+
     }
 
+    public void getDataFromLocalDB() {
+
+
+        MovieOrg localMovieOrg = new MovieOrg();
+        localMovieOrg.setResults(new ArrayList<>());
+
+        NoSQL.with(getActivity()).using(MovieOrgResults.class)
+                .bucketId(getString(R.string.local_movie_key))
+                .retrieve(noSQLEntities -> {
+
+                    for (int i = 0; i < noSQLEntities.size(); i++) {
+                        NoSQLEntity<MovieOrgResults> movieOrgResultsNoSQLEntity = noSQLEntities.get(i);
+                        localMovieOrg.getResults().add(movieOrgResultsNoSQLEntity.getData());
+                    }
+                    movieOrg = localMovieOrg;
+                    displayResults(movieOrg);
+
+                });
+
+    }
 }

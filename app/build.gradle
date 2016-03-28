@@ -52,6 +52,12 @@ repositories {
     mavenCentral()
 }
 
+repositories {
+    maven {
+        url 'https://oss.sonatype.org/content/groups/public'
+    }
+}
+
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -65,4 +71,6 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.squareup.retrofit2:converter-jackson:2.0.0-beta4'
     compile 'com.squareup.okhttp3:logging-interceptor:3.0.1'
+    compile 'com.colintmiller:simplenosql:0.5.1'
+
 }

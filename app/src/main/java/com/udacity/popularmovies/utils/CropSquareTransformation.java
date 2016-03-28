@@ -26,10 +26,6 @@ public class CropSquareTransformation implements Transformation {
         Point size = new Point();
         display.getSize(size);
         int width = size.x;
-        int height = size.y;
-        int size2 = Math.min(source.getWidth(), source.getHeight());
-        int x = (source.getWidth() - size2) / 2;
-        int y = (source.getHeight() - size2) / 2;
         Bitmap result = Bitmap.createScaledBitmap(source, width / 2, width / 2, true);
         if (result != source) {
             source.recycle();
