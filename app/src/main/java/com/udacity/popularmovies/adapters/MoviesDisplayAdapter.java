@@ -1,5 +1,6 @@
 package com.udacity.popularmovies.adapters;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -12,8 +13,10 @@ import android.widget.ProgressBar;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.udacity.popularmovies.R;
+import com.udacity.popularmovies.activities.DisplayActivity;
 import com.udacity.popularmovies.entities.MovieOrgResults;
 import com.udacity.popularmovies.fragments.DisplayFragment;
+import com.udacity.popularmovies.utils.Constants;
 import com.udacity.popularmovies.utils.CropSquareTransformation;
 
 import java.util.List;
@@ -85,8 +88,15 @@ public class MoviesDisplayAdapter extends RecyclerView.Adapter<MoviesDisplayAdap
 
         private void intentToDisplayFragment() {
 
-            Fragment displayFragment = DisplayFragment.newInstance(movieOrgResults.get(getAdapterPosition()));
-            context.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.container, displayFragment, "displayFragment").addToBackStack(null).commit();
+            if (!Constants.mTwoPane) {
+                Intent intent = new Intent(context.getActivity(), DisplayActivity.class);
+                intent.putExtra(DisplayActivity.key, movieOrgResults.get(getAdapterPosition()));
+                context.startActivity(intent);
+
+            } else {
+                Fragment displayFragment = DisplayFragment.newInstance(movieOrgResults.get(getAdapterPosition()));
+                context.getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.display_fragment, displayFragment, "displayFragment").commit();
+            }
 
 
         }

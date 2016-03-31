@@ -9,9 +9,11 @@ import android.support.v7.widget.Toolbar;
 import com.udacity.popularmovies.R;
 import com.udacity.popularmovies.entities.enums.Coordinator;
 import com.udacity.popularmovies.fragments.MainActivityFragment;
+import com.udacity.popularmovies.utils.Constants;
 
 public class MainActivity extends AppCompatActivity {
 
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,26 +21,29 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-            if (getSupportFragmentManager().getBackStackEntryCount() > 0)
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            else {
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            }
-        });
-
-        intiViews();
-
+        checkIfTwoPaneMode();
+        intiViews(savedInstanceState);
     }
 
-    private void intiViews() {
+    private void checkIfTwoPaneMode() {
+
+        if (findViewById(R.id.display_fragment) != null) {
+            mTwoPane = true;
+        }
+        Constants.mTwoPane = mTwoPane;
+    }
+
+    private void intiViews(Bundle savedInstanceState) {
         CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
         Coordinator.INSTANCE.setCoordinatorLayout(coordinatorLayout);
 
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(MainActivityFragment.TAG);
-        if (fragment == null)
-            getSupportFragmentManager().beginTransaction().replace(R.id.container, new MainActivityFragment(), MainActivityFragment.TAG).commit();
+        if (fragment == null) {
+            fragment = new MainActivityFragment();
+        }
+        getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment, fragment, "displayFragment").commit();
+
+
     }
 
 

@@ -7,10 +7,21 @@
     android:orientation="horizontal"
     tools:context="com.example.android.sunshine.app.MainActivity">
 
+    <!--
+    This layout is a two-pane layout for the Items master/detail flow.
+    -->
+
     <RelativeLayout
         android:id="@+id/main_fragment"
         android:name="com.udacity.popularmovies.fragments.MainActivityFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <RelativeLayout
+        android:id="@+id/display_fragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
 
 </LinearLayout>

@@ -3,6 +3,7 @@ package com.udacity.popularmovies.utils;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Display;
 
 import com.squareup.picasso.Transformation;
@@ -22,15 +23,29 @@ public class CropSquareTransformation implements Transformation {
     @Override
     public Bitmap transform(Bitmap source) {
 
-        Display display = context.getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int width = size.x;
-        Bitmap result = Bitmap.createScaledBitmap(source, width / 2, width / 2, true);
-        if (result != source) {
-            source.recycle();
+        Log.d("two_pane",""+Constants.mTwoPane);
+        if (!Constants.mTwoPane) {
+            Display display = context.getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            int width = size.x;
+            Bitmap result = Bitmap.createScaledBitmap(source, width / 2, width / 2, true);
+            if (result != source) {
+                source.recycle();
+            }
+            return result;
+        } else {
+            Display display = context.getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            int width = size.x;
+            Bitmap result = Bitmap.createScaledBitmap(source, width / 6, width / 6, true);
+            if (result != source) {
+                source.recycle();
+            }
+            return result;
         }
-        return result;
+
     }
 
     @Override

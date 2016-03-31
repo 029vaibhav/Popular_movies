@@ -5,37 +5,41 @@ import android.os.Parcelable;
 
 import java.util.List;
 
+import ckm.simple.sql_provider.annotation.SimpleSQLColumn;
+import ckm.simple.sql_provider.annotation.SimpleSQLTable;
+
 /**
  * Created by vaibhav on 18/2/16.
  */
-public class MovieOrgResults implements Parcelable{
+@SimpleSQLTable(table = "MovieOrgResults", provider = "MovieProvider")
+public class MovieOrgResults implements Parcelable {
 
+    @SimpleSQLColumn("vote_average")
     private String vote_average;
-
+    @SimpleSQLColumn("backdrop_path")
     private String backdrop_path;
-
+    @SimpleSQLColumn("adult")
     private String adult;
-
+    @SimpleSQLColumn("id")
     private String id;
-
+    @SimpleSQLColumn("title")
     private String title;
-
+    @SimpleSQLColumn("overview")
     private String overview;
-
+    @SimpleSQLColumn("original_language")
     private String original_language;
-
     private List<String> genre_ids;
-
+    @SimpleSQLColumn("release_date")
     private String release_date;
-
+    @SimpleSQLColumn("original_title")
     private String original_title;
-
+    @SimpleSQLColumn("vote_count")
     private String vote_count;
-
+    @SimpleSQLColumn("poster_path")
     private String poster_path;
-
+    @SimpleSQLColumn("video")
     private String video;
-
+    @SimpleSQLColumn("popularity")
     private String popularity;
 
     public MovieOrgResults() {

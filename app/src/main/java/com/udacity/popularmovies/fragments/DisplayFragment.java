@@ -27,12 +27,13 @@ import com.squareup.picasso.Picasso;
 import com.udacity.popularmovies.R;
 import com.udacity.popularmovies.adapters.ReviewDisplayAdapter;
 import com.udacity.popularmovies.adapters.VideoDisplayAdapter;
-import com.udacity.popularmovies.entities.MovieOrg;
+import com.udacity.popularmovies.contentprovider.MovieHelper;
 import com.udacity.popularmovies.entities.MovieOrgResults;
 import com.udacity.popularmovies.entities.Reviews;
 import com.udacity.popularmovies.entities.Video;
 import com.udacity.popularmovies.entities.enums.Coordinator;
 import com.udacity.popularmovies.utils.Client;
+import com.udacity.popularmovies.utils.Constants;
 import com.udacity.popularmovies.utils.CropSquareTransformation;
 
 import java.io.IOException;
@@ -47,6 +48,7 @@ import retrofit2.Response;
 public class DisplayFragment extends Fragment {
 
 
+    public static final String TAG = "DisplayFragment";
     private static String key = "movie";
     TextView title, releaseDate, rating, overView;
     ImageView poster;
@@ -90,7 +92,8 @@ public class DisplayFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        menu.setGroupVisible(R.id.menu_group, false);
+        if (!Constants.mTwoPane)
+            menu.setGroupVisible(R.id.menu_group, false);
         super.onPrepareOptionsMenu(menu);
     }
 
@@ -132,14 +135,13 @@ public class DisplayFragment extends Fragment {
 
     private void checkIfFav(String id) {
 
-        NoSQL.with(getActivity()).using(MovieOrg.class)
-                .bucketId(getString(R.string.local_movie_key))
-                .entityId(id)
-                .retrieve(noSQLEntities -> {
-                    if (noSQLEntities != null && noSQLEntities.size() > 0) {
-                        fab.setBackgroundTintList(ContextCompat.getColorStateList(getActivity(), R.color.pink));
-                    }
-                });
+
+        MovieOrgResults movieOrgResults = MovieHelper.getMovieOrgResults(getActivity().getContentResolver(), id);
+        if (movieOrgResults != null) {
+            fab.setBackgroundTintList(ContextCompat.getColorStateList(getActivity(), R.color.pink));
+
+        }
+
     }
 
     private void getMovieVideos(String id) {
@@ -193,6 +195,8 @@ public class DisplayFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putParcelable(movieOrgResults.getId(), video);
+        outState.putParcelable(key, movieOrgResults);
+
         super.onSaveInstanceState(outState);
     }
 
@@ -253,38 +257,26 @@ public class DisplayFragment extends Fragment {
 
     private void retrieveLocalMovieDetail(String id) {
 
-        NoSQL.with(getActivity()).using(MovieOrgResults.class)
-                .bucketId(getString(R.string.local_movie_key))
-                .entityId(id)
-                .retrieve(noSQLEntities -> {
+        MovieOrgResults movieOrgResults = MovieHelper.getMovieOrgResults(getActivity().getContentResolver(), id);
 
-                    if (noSQLEntities == null || noSQLEntities.size() == 0) {
-                        fab.setBackgroundTintList(ContextCompat.getColorStateList(getActivity(), R.color.pink));
-                        NoSQLEntity<MovieOrgResults> entity = new NoSQLEntity<MovieOrgResults>(getString(R.string.local_movie_key), movieOrgResults.getId());
-                        entity.setData(movieOrgResults);
-                        NoSQL.with(getActivity()).using(MovieOrgResults.class).save(entity);
+        if(movieOrgResults==null)
+        {
+            fab.setBackgroundTintList(ContextCompat.getColorStateList(getActivity(), R.color.pink));
+            MovieHelper.createMovieOrgResults(getActivity().getContentResolver(), this.movieOrgResults);
 
-                        NoSQLEntity<Video> videoNoSQLEntity = new NoSQLEntity<Video>(getString(R.string.local_video_key), movieOrgResults.getId());
-                        videoNoSQLEntity.setData(video);
-                        NoSQL.with(getActivity()).using(Video.class).save(videoNoSQLEntity);
+            NoSQLEntity<Video> videoNoSQLEntity = new NoSQLEntity<Video>(getString(R.string.local_video_key), this.movieOrgResults.getId());
+            videoNoSQLEntity.setData(video);
+            NoSQL.with(getActivity()).using(Video.class).save(videoNoSQLEntity);
+        }
+        else {
+            fab.setBackgroundTintList(ContextCompat.getColorStateList(getActivity(), R.color.colorAccent));
+            MovieHelper.deleteMovieOrgResults(getActivity().getContentResolver(), this.movieOrgResults);
 
-                    } else {
-                        fab.setBackgroundTintList(ContextCompat.getColorStateList(getActivity(), R.color.colorAccent));
-                        NoSQL.with(getActivity()).using(MovieOrgResults.class)
-                                .bucketId(getString(R.string.local_movie_key))
-                                .entityId(movieOrgResults.getId())
-                                .delete();
-
-                        NoSQL.with(getActivity()).using(Video.class)
-                                .bucketId(getString(R.string.local_video_key))
-                                .entityId(movieOrgResults.getId())
-                                .delete();
-
-
-                    }
-
-
-                });
+            NoSQL.with(getActivity()).using(Video.class)
+                    .bucketId(getString(R.string.local_video_key))
+                    .entityId(this.movieOrgResults.getId())
+                    .delete();
+        }
 
     }
 

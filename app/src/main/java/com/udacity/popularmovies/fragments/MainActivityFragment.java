@@ -1,7 +1,6 @@
 package com.udacity.popularmovies.fragments;
 
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -14,17 +13,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.colintmiller.simplenosql.NoSQL;
-import com.colintmiller.simplenosql.NoSQLEntity;
 import com.udacity.popularmovies.R;
 import com.udacity.popularmovies.adapters.MoviesDisplayAdapter;
+import com.udacity.popularmovies.contentprovider.MovieHelper;
 import com.udacity.popularmovies.entities.MovieOrg;
 import com.udacity.popularmovies.entities.MovieOrgResults;
 import com.udacity.popularmovies.entities.enums.Coordinator;
 import com.udacity.popularmovies.utils.Client;
+import com.udacity.popularmovies.utils.Constants;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -87,12 +87,21 @@ public class MainActivityFragment extends Fragment {
 
     private void initViews(ViewGroup viewGroup) {
         recyclerView = (RecyclerView) viewGroup.findViewById(R.id.recycler_view);
-        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+        if (!Constants.mTwoPane)
             gridLayoutManager = new GridLayoutManager(getActivity(), 2);
         else
             gridLayoutManager = new GridLayoutManager(getActivity(), 3);
         snackbar = Snackbar.make(Coordinator.INSTANCE.getCoordinatorLayout(), getString(R.string.no_internet), Snackbar.LENGTH_INDEFINITE)
                 .setAction(getString(R.string.retry), v -> getDataFromServer());
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        if (!Constants.mTwoPane) {
+            menu.setGroupVisible(R.id.menu_group, true);
+            menu.setGroupVisible(R.id.share_group, false);
+        }
+        super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -181,23 +190,11 @@ public class MainActivityFragment extends Fragment {
     }
 
     public void getDataFromLocalDB() {
-
-
         MovieOrg localMovieOrg = new MovieOrg();
         localMovieOrg.setResults(new ArrayList<>());
-
-        NoSQL.with(getActivity()).using(MovieOrgResults.class)
-                .bucketId(getString(R.string.local_movie_key))
-                .retrieve(noSQLEntities -> {
-
-                    for (int i = 0; i < noSQLEntities.size(); i++) {
-                        NoSQLEntity<MovieOrgResults> movieOrgResultsNoSQLEntity = noSQLEntities.get(i);
-                        localMovieOrg.getResults().add(movieOrgResultsNoSQLEntity.getData());
-                    }
-                    movieOrg = localMovieOrg;
-                    displayResults(movieOrg);
-
-                });
-
+        List<MovieOrgResults> allMovieResults = MovieHelper.getAllMovieResults(getActivity().getContentResolver());
+        localMovieOrg.getResults().addAll(allMovieResults);
+        movieOrg = localMovieOrg;
+        displayResults(movieOrg);
     }
 }
